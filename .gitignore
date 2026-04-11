@@ -40,7 +40,10 @@ yarn-error.log*
 # vercel
 .vercel
 
+<<<<<<< HEAD
 .next/
+=======
+>>>>>>> 06e8e286 (Add git ignore)
 node_modules/
 
 # typescript
