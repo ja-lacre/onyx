@@ -40,9 +40,11 @@ yarn-error.log*
 # vercel
 .vercel
 
-.next/
 node_modules/
-
+>>>>>>> 06e8e286 (Add git ignore)
+=======
+.next/
+<<<<<<< HEAD
 # typescript
 *.tsbuildinfo
 next-env.d.ts
