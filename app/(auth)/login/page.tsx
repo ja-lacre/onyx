@@ -1,112 +1,179 @@
 "use client";
 
-import { useState } from "react";
 import Link from "next/link";
-import { Eye, EyeOff, Lock, Mail } from "lucide-react";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 
+import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import Image from "next/image";
+
+import { AlertCircle } from "lucide-react";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 export default function LoginPage() {
-  const [showPassword, setShowPassword] = useState(false);
+  const router = useRouter();
+  const supabase = createClient();
 
-  const togglePasswordVisibility = () => {
-    setShowPassword(!showPassword);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+    setErrorMessage(null);
+
+    const { data: authData, error: authError } =
+      await supabase.auth.signInWithPassword({
+        email: email,
+        password: password,
+      });
+
+    if (authError) {
+      setErrorMessage(authError.message);
+      setIsLoading(false);
+      return;
+    }
+
+    if (authData.user) {
+      const { data: profileData, error: profileError } = await supabase
+        .from("users")
+        .select("role")
+        .eq("user_id", authData.user.id)
+        .single();
+
+      if (profileError) {
+        setErrorMessage(
+          "Could not fetch user role. Check RLS on 'users' table.",
+        );
+        await supabase.auth.signOut();
+        setIsLoading(false);
+        return;
+      }
+
+      router.refresh();
+
+      if (profileData?.role === "admin") {
+        router.push("/dashboard");
+      } else {
+        router.push("/home");
+      }
+    }
+
+    setIsLoading(false);
   };
 
   return (
-    <div className="w-full min-h-screen grid grid-cols-1 md:grid-cols-2">
+    <div className="w-full min-h-screen grid grid-cols-1 md:grid-cols-2 bg-[#E8F3E8]">
       {}
-      <div className="bg-[#0A1D56] min-h-[150px] md:min-h-screen">{}</div>
+      <div className="hidden md:flex flex-col justify-center items-start p-8 lg:p-12 xl:p-16 text-[#1B4D3E]">
+        {}
+        <h1 className="text-5xl lg:text-7xl xl:text-[100px] font-bold mb-4 lg:mb-6 flex items-center gap-3 lg:gap-5 transition-all duration-300">
+          <Image
+            src="/logos/queuely_logo.svg"
+            alt="Queuely Logo"
+            width={160}
+            height={160}
+            className="h-16 w-16 lg:h-24 lg:w-24 xl:h-40 xl:w-40 object-contain"
+          />
+          Queuely
+        </h1>
+
+        {}
+        <p className="text-lg lg:text-xl xl:text-2xl font-medium max-w-md lg:max-w-2xl">
+          Modern queue management for services and businesses
+        </p>
+      </div>
 
       {}
-      <div className="flex items-center justify-center p-8 bg-white">
-        <div className="w-full max-w-md space-y-8">
+      <div className="flex items-center justify-center p-4 md:p-8">
+        {}
+        <div className="w-full max-w-[450px] bg-white rounded-2xl shadow-xl p-8 md:p-12 space-y-8">
           {}
-          <div className="text-center md:text-left">
-            <h1 className="text-3xl font-bold text-[#0A1D56]">Login</h1>
-            <p className="text-gray-500 mt-2">Welcome back!</p>
+          <div className="text-center">
+            <h2 className="text-3xl font-bold text-[#1B4D3E]">Welcome Back</h2>
+            <p className="text-gray-500 mt-3">
+              Sign in to access and manage your queues
+            </p>
           </div>
 
           {}
-          <form className="space-y-6">
+          <form onSubmit={handleLogin} className="space-y-6">
             {}
             <div className="space-y-2">
-              <Label htmlFor="email" className="sr-only">
+              <Label htmlFor="email" className="text-[#1B4D3E] font-medium">
                 Email
               </Label>
-              <div className="relative">
-                {}
-                <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="Email"
-                  className="pl-10 py-6 bg-gray-50 border-gray-200 rounded-xl focus-visible:ring-[#2F55D4] focus-visible:ring-offset-0"
-                  required
-                />
-              </div>
+              <Input
+                id="email"
+                type="email"
+                placeholder="Enter your email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="py-6 bg-gray-100/50 border-gray-200 rounded-xl focus-visible:ring-[#1B4D3E] focus-visible:ring-offset-0"
+                required
+              />
             </div>
 
             {}
             <div className="space-y-2">
-              <Label htmlFor="password" className="sr-only">
+              <Label htmlFor="password" className="text-[#1B4D3E] font-medium">
                 Password
               </Label>
-              <div className="relative">
-                {}
-                <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
-                <Input
-                  id="password"
-                  type={showPassword ? "text" : "password"}
-                  placeholder="Password"
-                  className="pl-10 pr-10 py-6 bg-gray-50 border-gray-200 rounded-xl focus-visible:ring-[#2F55D4] focus-visible:ring-offset-0"
-                  required
-                />
-                {}
-                <button
-                  type="button"
-                  onClick={togglePasswordVisibility}
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 focus:outline-none"
-                  aria-label={showPassword ? "Hide password" : "Show password"}
-                >
-                  {showPassword ? (
-                    <EyeOff className="h-5 w-5" />
-                  ) : (
-                    <Eye className="h-5 w-5" />
-                  )}
-                </button>
-              </div>
-            </div>
-
-            {}
-            <div className="flex justify-end">
-              <Link
-                href="/forgot-password"
-                className="text-sm font-medium text-[#2F55D4] hover:underline"
-              >
-                Forgot Password?
-              </Link>
+              <Input
+                id="password"
+                type="password"
+                placeholder="Enter your password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="py-6 bg-gray-100/50 border-gray-200 rounded-xl focus-visible:ring-[#1B4D3E] focus-visible:ring-offset-0"
+                required
+              />
             </div>
 
             {}
             <Button
               type="submit"
-              className="w-full py-6 text-lg bg-[#2F55D4] hover:bg-[#2547b8] text-white rounded-xl"
+              disabled={isLoading}
+              className="w-full py-6 text-lg font-semibold bg-[#1B4D3E] hover:bg-[#153a2f] text-white rounded-xl mt-4 disabled:opacity-70"
             >
-              Login
+              {}
+              {isLoading ? "Signing In..." : "Sign In"}
             </Button>
           </form>
 
           {}
-          <div className="text-center text-sm text-gray-500">
-            Don't have an account yet?{" "}
-            <Link
-              href="/signup"
-              className="font-medium text-[#2F55D4] hover:underline"
+          {errorMessage && (
+            <Alert
+              variant="destructive"
+              className="bg-red-50 text-red-600 border-red-200"
             >
-              Sign Up
+              <AlertCircle className="h-4 w-4" />
+              <AlertTitle>Error</AlertTitle>
+              <AlertDescription>{errorMessage}</AlertDescription>
+            </Alert>
+          )}
+
+          {}
+          <div className="text-center space-y-4 text-sm text-gray-600">
+            <p>
+              Dont have account?{" "}
+              <Link
+                href="/signup"
+                className="font-semibold text-[#1B4D3E] hover:underline"
+              >
+                Sign up
+              </Link>
+            </p>
+            <Link
+              href="/forgot-password"
+              className="block font-semibold text-[#1B4D3E] hover:underline"
+            >
+              Forgot your password?
             </Link>
           </div>
         </div>

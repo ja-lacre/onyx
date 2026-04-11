@@ -1,10 +1,6 @@
 {
   "$schema": "https://ui.shadcn.com/schema.json",
-<<<<<<< HEAD
   "style": "radix-mira",
-=======
-  "style": "radix-lyra",
->>>>>>> 333834edb (feat: initial commit)
   "rsc": true,
   "tsx": true,
   "tailwind": {
@@ -14,11 +10,7 @@
     "cssVariables": true,
     "prefix": ""
   },
-<<<<<<< HEAD
   "iconLibrary": "hugeicons",
-=======
-  "iconLibrary": "phosphor",
->>>>>>> 333834edb (feat: initial commit)
   "rtl": false,
   "aliases": {
     "components": "@/components",
