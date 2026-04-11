@@ -1,4 +1,7 @@
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> 333834edb (feat: initial commit)
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
 # dependencies
@@ -40,6 +43,9 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+<<<<<<< HEAD
 =======
 node_modules
 >>>>>>> d8191acd9 (Initialize Project)
+=======
+>>>>>>> 333834edb (feat: initial commit)
