@@ -9,6 +9,16 @@ Project Codename **ONYX** is a modern, real-time Queue Management System (QMS) t
 
 ## ON.010.002 Release Notes
 
+- Initialized the core application framework using Next.js.
+- Integrated Supabase for backend services, database management, and authentication.
+- Set up styling and UI architecture using Tailwind CSS and shadcn/ui components.
+- Developed foundational frontend pages and routing, including the Authentication page (Login) and Dashboard layouts (Overview, Settings).
+
+**Known Issues/Bugs:**
+
+- No proper middleware implemented yet for route protection and session handling.
+- Inconsistent layout bugs present across certain dashboard views and viewport sizes.
+
 ## ON.010.001 Release Notes
 
 - Initialize the main project GitHub repository
