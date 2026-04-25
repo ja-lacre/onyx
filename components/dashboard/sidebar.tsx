@@ -22,7 +22,7 @@ import {
 } from "@/components/ui/tooltip";
 
 const navItems = [
-  { name: "Dashboard", href: "/overview", icon: LayoutDashboard },
+  { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
   { name: "Queue Management", href: "/queue-management", icon: Users },
   { name: "Settings", href: "/settings", icon: Settings },
 ];
