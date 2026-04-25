@@ -4,8 +4,18 @@ Project Codename **ONYX** is a modern, real-time Queue Management System (QMS) t
 
 | Internal Release Code | Date Released |
 | :-------------------- | :------------ |
+| ON.010.003            | 2026-04-25    |
 | ON.010.002            | 2026-04-12    |
 | ON.010.001            | 2026-02-27    |
+
+## ON.010.003 Release Notes
+
+- Implemented a responsive, collapsible Dashboard Sidebar component featuring active route highlighting, smooth transitions, and hover tooltips for a better UX when minimized.
+- Configured the Supabase browser client utilizing `@supabase/ssr` to handle client-side database interactions and authentication state.
+
+**Known Issues/Bugs:**
+
+- No known issues/bugs
 
 ## ON.010.002 Release Notes
 
