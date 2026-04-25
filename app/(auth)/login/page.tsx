@@ -8,6 +8,7 @@ import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import Image from "next/image";
 
 import { AlertCircle } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -75,15 +76,21 @@ export default function LoginPage() {
   return (
     <div className="w-full min-h-screen grid grid-cols-1 md:grid-cols-2 bg-[#E8F3E8]">
       {}
-      <div className="hidden md:flex flex-col justify-center items-start p-16 text-[#1B4D3E]">
+      <div className="hidden md:flex flex-col justify-center items-start p-8 lg:p-12 xl:p-16 text-[#1B4D3E]">
         {}
-        <h1 className="text-6xl font-bold mb-6 flex items-center gap-2">
-          {}
-          <div className="h-12 w-12 bg-[#1B4D3E] rounded-lg"></div>
+        <h1 className="text-5xl lg:text-7xl xl:text-[100px] font-bold mb-4 lg:mb-6 flex items-center gap-3 lg:gap-5 transition-all duration-300">
+          <Image
+            src="/logos/queuely_logo.svg"
+            alt="Queuely Logo"
+            width={160}
+            height={160}
+            className="h-16 w-16 lg:h-24 lg:w-24 xl:h-40 xl:w-40 object-contain"
+          />
           Queuely
         </h1>
-        <p className="text-2xl font-medium">
-          Modern queue management for modern service and business
+        {}
+        <p className="text-lg lg:text-xl xl:text-2xl font-medium max-w-md lg:max-w-2xl">
+          Modern queue management for services and businesses
         </p>
       </div>
 
@@ -98,18 +105,6 @@ export default function LoginPage() {
               Sign in to access and manage your queues
             </p>
           </div>
-
-          {}
-          {errorMessage && (
-            <Alert
-              variant="destructive"
-              className="bg-red-50 text-red-600 border-red-200"
-            >
-              <AlertCircle className="h-4 w-4" />
-              <AlertTitle>Error</AlertTitle>
-              <AlertDescription>{errorMessage}</AlertDescription>
-            </Alert>
-          )}
 
           {}
           <form onSubmit={handleLogin} className="space-y-6">
@@ -155,6 +150,18 @@ export default function LoginPage() {
               {isLoading ? "Signing In..." : "Sign In"}
             </Button>
           </form>
+
+          {}
+          {errorMessage && (
+            <Alert
+              variant="destructive"
+              className="bg-red-50 text-red-600 border-red-200"
+            >
+              <AlertCircle className="h-4 w-4" />
+              <AlertTitle>Error</AlertTitle>
+              <AlertDescription>{errorMessage}</AlertDescription>
+            </Alert>
+          )}
 
           {}
           <div className="text-center space-y-4 text-sm text-gray-600">

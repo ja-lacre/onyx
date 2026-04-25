@@ -2,7 +2,7 @@ import { CircleCheck } from "lucide-react";
 
 export function Topbar() {
   return (
-    <header className="bg-[#5CB85C] text-white p-4 flex justify-end items-center shadow-md">
+    <header className="bg-[#c6dec5] text-[#1B4D3E] p-4 flex justify-end items-center shadow-md">
       {/* Page Title & Description (Not in this topbar per design, but good to have a place) */}
       {/* <div className="flex-1">
         <h1 className="text-xl font-semibold">Dashboard Overview</h1>

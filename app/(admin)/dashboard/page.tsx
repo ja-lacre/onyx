@@ -129,7 +129,7 @@ export default function DashboardOverviewPage() {
                   }}
                 />
                 {}
-                <Bar dataKey="volume" fill="#4A8B7F" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="volume" fill="#1B4D3E" radius={[4, 4, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </div>

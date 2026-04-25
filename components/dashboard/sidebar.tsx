@@ -38,7 +38,7 @@ export function Sidebar({ isSidebarOpen, toggleSidebar }: SidebarProps) {
   return (
     <aside
       className={cn(
-        "bg-[#0A1D56] text-white flex flex-col shadow-lg transition-all duration-300 ease-in-out z-10 relative",
+        "bg-[#1B4D3E] text-white flex flex-col shadow-lg transition-all duration-300 ease-in-out z-10 relative",
         isSidebarOpen ? "w-64" : "w-[70px] items-center",
       )}
     >
@@ -52,16 +52,18 @@ export function Sidebar({ isSidebarOpen, toggleSidebar }: SidebarProps) {
         {}
         {isSidebarOpen && (
           <div className="flex items-center transition-opacity duration-300">
-            <div className="bg-white rounded-lg p-1.5 mr-3">
+            <div className="rounded-lg p-1.5 mr-3">
               {}
               <Image
-                src="/images/logo.svg"
+                src="/logos/queuely_light_logo.svg"
                 alt="Admin Logo"
-                width={20}
-                height={20}
+                width={40}
+                height={40}
               />
             </div>
-            <span className="text-lg font-bold whitespace-nowrap">Admin</span>
+            <span className="text-lg text-[30px] font-bold whitespace-nowrap text-[#E8F3E8]">
+              Admin
+            </span>
           </div>
         )}
 
@@ -81,7 +83,6 @@ export function Sidebar({ isSidebarOpen, toggleSidebar }: SidebarProps) {
       <nav className="flex-1 px-2 space-y-2">
         {navItems.map((item) => {
           const isActive = pathname === item.href;
-
           const LinkContent = (
             <Link
               href={item.href}
@@ -89,7 +90,7 @@ export function Sidebar({ isSidebarOpen, toggleSidebar }: SidebarProps) {
                 "flex items-center py-2.5 rounded-lg transition-colors group relative",
                 isSidebarOpen ? "px-4" : "justify-center px-2",
                 isActive
-                  ? "bg-[#2F55D4] text-white"
+                  ? "bg-[#E8F3E8] text-[#1B4D3E]"
                   : "text-gray-300 hover:bg-white/[0.08] hover:text-white",
               )}
             >
@@ -116,7 +117,7 @@ export function Sidebar({ isSidebarOpen, toggleSidebar }: SidebarProps) {
               {}
               <TooltipContent
                 side="right"
-                className="bg-[#0A1D56] text-white border-white/10 font-medium ml-2"
+                className="bg-[#1B4D3E] text-white border-white/10 font-medium ml-2"
               >
                 <p>{item.name}</p>
               </TooltipContent>
@@ -171,7 +172,7 @@ export function Sidebar({ isSidebarOpen, toggleSidebar }: SidebarProps) {
               </TooltipTrigger>
               <TooltipContent
                 side="right"
-                className="bg-[#0A1D56] text-white border-white/10 font-medium ml-2"
+                className="bg-[#1B4D3E] text-white border-white/10 font-medium ml-2"
               >
                 Logout
               </TooltipContent>
