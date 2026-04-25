@@ -16,7 +16,7 @@ Project Codename **ONYX** is a modern, real-time Queue Management System (QMS) t
 
 **Known Issues/Bugs:**
 
-- No known issues/bugs
+- Queue statuses, current serving numbers, and estimated waiting times do not broadcast instantly; the interface may require manual refreshing until Supabase real-time subscriptions are fully wired.
 
 ## ON.010.002 Release Notes
 
