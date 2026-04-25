@@ -10,8 +10,9 @@ Project Codename **ONYX** is a modern, real-time Queue Management System (QMS) t
 
 ## ON.010.003 Release Notes
 
-- Implemented a responsive, collapsible Dashboard Sidebar component featuring active route highlighting, smooth transitions, and hover tooltips for a better UX when minimized.
+- Resolved known layout inconsistencies across the dashboard and sidebar to ensure a fully responsive design.
 - Configured the Supabase browser client utilizing `@supabase/ssr` to handle client-side database interactions and authentication state.
+- Developed the primary administrative interface for creating, configuring, and managing active queues.
 
 **Known Issues/Bugs:**
 
