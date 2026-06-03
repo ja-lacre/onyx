@@ -24,6 +24,8 @@ export default function SettingsPage() {
     avg_service_time: 5,
     maintenance_mode: false,
     max_capacity: 0,
+    auto_advance: false,
+    auto_rollback: false,
   });
 
   // --- FETCH SETTINGS ---
@@ -31,13 +33,23 @@ export default function SettingsPage() {
     const fetchSettings = async () => {
       try {
         const data = await getQueueConfig(supabase);
-        setQueueConfigForm({
-          id: data.id,
-          name: data.name,
-          avg_service_time: data.avg_service_time,
-          maintenance_mode: data.maintenance_mode,
-          max_capacity: data.max_capacity || 0,
-        });
+        if (data) { 
+          setQueueConfigForm({
+            id: data.id,
+              name: data.name,
+              avg_service_time: data.avg_service_time,
+              maintenance_mode: data.maintenance_mode,
+              max_capacity: data.max_capacity || 0,
+              auto_advance: data.auto_advance || false, 
+              auto_rollback: data.auto_rollback || false,
+            });
+        } else {
+            // OPTIONAL: Warn the user that config is missing and defaults are used
+            console.warn("Queue configuration row not found. Using default form values.");
+            // If data is null, the form retains its initial useState values, 
+            // but we must manually set the ID to an empty string if it's required for saving later.
+            setQueueConfigForm(prev => ({ ...prev, id: '' }));
+        }
       } catch (error) {
         console.error("Failed to fetch settings:", error);
       } finally {
@@ -181,7 +193,37 @@ export default function SettingsPage() {
                   />
                 </div>
               </div>
-              <p className="text-sm text-muted-foreground pt-4">Other configuration switches here...</p>
+              <div className="space-y-4 pt-4">
+                {/* Auto-advance Queue */}
+                <div className="flex items-center justify-between space-x-2 border p-4 rounded-lg bg-[#E8F3E8] border-none">
+                    <div className="space-y-0.5">
+                        <Label className="text-base font-semibold">Auto-advance Queue</Label>
+                        <p className="text-sm text-muted-foreground">
+                            Automatically call the next customer when service completes.
+                        </p>
+                    </div>
+                    <Switch 
+                        checked={queueConfigForm.auto_advance} 
+                        onCheckedChange={(checked) => setQueueConfigForm(prev => ({...prev, auto_advance: checked}))}
+                    />
+                </div>
+
+                {/* NOTE: The Auto-Priority switch block has been REMOVED here. */}
+
+                {/* Auto-rollback (No Show) */}
+                <div className="flex items-center justify-between space-x-2 border p-4 rounded-lg bg-[#E8F3E8] border-none">
+                    <div className="space-y-0.5">
+                        <Label className="text-base font-semibold">Auto-Rollback</Label>
+                        <p className="text-sm text-muted-foreground">
+                            Automatically put the customer at the end of the queue if they are a no show.
+                        </p>
+                    </div>
+                    <Switch 
+                        checked={queueConfigForm.auto_rollback} 
+                        onCheckedChange={(checked) => setQueueConfigForm(prev => ({...prev, auto_rollback: checked}))}
+                    />
+                </div>
+             </div>
             </CardContent>
             <CardFooter>
               <Button onClick={handleSaveChanges} disabled={saving} className="bg-[#1B4D3E] hover:bg-[#153a2f]">
