@@ -1,4 +1,5 @@
 // src/app/(user)/home/page.tsx
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import { createClient } from "@/lib/supabase/client";
@@ -24,7 +25,15 @@ export default function UserDashboardPage() {
 
     // Use the helper function instead of raw Supabase queries
     const serviceIdentifier = ticket.queue_id;
-    const metrics = await getQueueMetrics(supabase, serviceIdentifier, ticket.created_at);
+    const ticketId = ticket.ticket_id || ticket.id;
+
+    const metrics = await getQueueMetrics(
+        supabase, 
+        serviceIdentifier, 
+        ticket.created_at,
+        ticketId, // ADDED: Pass the ticket ID
+        ticket.status // ADDED: Pass the ticket status
+    );
 
     setActiveTicket((prev: any) => ({
       ...prev,
@@ -150,7 +159,7 @@ export default function UserDashboardPage() {
           {/* Skeleton Card */}
           <Card className="bg-white border-none shadow-lg overflow-hidden rounded-2xl text-center p-8 space-y-6">
             <CardContent className="p-0 space-y-4 flex flex-col items-center">
-              <div className="h-24 w-24 bg-[#E8F3E8] rounded-full opacity-50"></div>
+              <div className="h-24 w-52 bg-[#E8F3E8] rounded-md opacity-50"></div>
               <div className="h-8 w-48 bg-gray-200 rounded-md"></div>
               <div className="h-4 w-64 bg-gray-100 rounded-md"></div>
             </CardContent>
@@ -245,9 +254,10 @@ export default function UserDashboardPage() {
 
               <CardFooter className="p-6 pt-0 pb-10">
                 <Button
-                  onClick={handleLeaveQueue}
-                  disabled={loading}
-                  className="w-full h-14 text-lg font-bold text-[#1B4D3E] bg-[#F4E08F] hover:bg-[#EACF6A] rounded-xl shadow-sm transition-all hover:shadow-md active:scale-[0.98]"
+                    onClick={handleLeaveQueue}
+                    disabled={loading}
+                    variant="accent-gold"
+                    className="w-full h-14 text-lg font-bold" 
                 >
                   {loading ? (
                     <><Loader2 className="mr-2 h-5 w-5 animate-spin" /> Leaving...</>
@@ -255,15 +265,6 @@ export default function UserDashboardPage() {
                 </Button>
               </CardFooter>
             </Card>
-
-            {/* Notification */}
-            <div className="mt-4 bg-[#6A9A8B] text-white p-4 rounded-xl text-sm shadow-sm flex items-start gap-3">
-              <svg className="w-5 h-5 shrink-0 opacity-90" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-              <div>
-                <p><span className="font-bold">Queue Updates:</span> You've been added to the end of the queue.</p>
-                <p className="text-white/70 text-xs mt-1">Just now</p>
-              </div>
-            </div>
           </>
         ) : (
           // --- VIEW 2: NO TICKET ---
