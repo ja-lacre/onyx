@@ -5,7 +5,9 @@ import { useState, useEffect, useMemo } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Users, CheckCircle, Clock, AlertTriangle, Loader2 } from "lucide-react";
-import { getDashboardStats } from "@/utils/queue-service";
+import { getDashboardStats, getQueueConfig, getWeeklyQueueVolume } from "@/utils/queue-service";
+import { useRouter } from "next/navigation";
+
 import {
   BarChart,
   Bar,
@@ -17,15 +19,10 @@ import {
 } from "recharts";
 
 // 1. Sample data for the Weekly Queue Volume Chart
-const chartData = [
-  { name: "Monday", volume: 180 },
-  { name: "Tuesday", volume: 350 },
-  { name: "Wednesday", volume: 450 },
-  { name: "Thursday", volume: 300 },
-  { name: "Friday", volume: 400 },
-  { name: "Saturday", volume: 320 },
-  { name: "Sunday", volume: 180 },
-];
+interface ChartDataPoint {
+    name: string;
+    volume: number;
+}
 
 interface DashboardStats {
     totalCustomersToday: number;
@@ -38,24 +35,64 @@ export default function DashboardOverviewPage() {
     const supabase = useMemo(() => createClient(), []);
     const [stats, setStats] = useState<DashboardStats | null>(null);
     const [isLoading, setIsLoading] = useState(true);
+    const [chartData, setChartData] = useState<ChartDataPoint[]>([]);
+    const router = useRouter();
 
     // --- FETCH DATA ---
     useEffect(() => {
-        const fetchStats = async () => {
-            setIsLoading(true);
-            try {
-                // FIX: Call the new helper function
-                const dashboardStats = await getDashboardStats(supabase);
-                setStats(dashboardStats);
-            } catch (error) {
-                console.error("Error fetching dashboard statistics:", error);
-                // Optionally show a default or zeroed stats card on error
-            } finally {
-                setIsLoading(false);
-            }
+      const fetchAllData = async () => {
+        setIsLoading(true);
+            
+        const { data: { user } } = await supabase.auth.getUser();
+            
+        // 1. Authorization Check (Client-side Fallback)
+        const { data: profile } = await supabase
+          .from('users')
+          .select('role')
+          .eq('user_id', user?.id)
+          .maybeSingle();
+
+        if (!user || profile?.role !== 'admin') {
+          router.push('/home'); // Redirect non-admins
+          return;
+        }
+        
+        const queueConfig = await getQueueConfig(supabase);
+
+          // 2. Fetch Dashboard Stats
+          if (!queueConfig || !queueConfig.id) {
+            console.warn("Dashboard requires queue configuration. None found.");
+            // Set safe defaults for stats
+            setStats({
+              totalCustomersToday: 0,
+              completedServices: 0,
+              currentQueueLength: 0,
+              averageWaitTime: '--'
+            });
+            setChartData([]);
+            setIsLoading(false);
+            return;
+          }
+                
+          try {
+            const [dashboardStats, volumeData] = await Promise.all([
+              getDashboardStats(supabase),
+              getWeeklyQueueVolume(supabase, queueConfig.id)
+            ]);
+
+            setStats(dashboardStats);
+            setChartData(volumeData);
+
+          } catch (error) {
+            console.error("Error fetching dashboard data:", error);
+            setStats(null);
+            setChartData([]);
+          } finally {
+            setIsLoading(false);
+          }
         };
-        fetchStats();
-    }, [supabase]);
+        fetchAllData();
+    }, [supabase, router]);
 
     // --- RENDER BLOCKING ---
     if (isLoading || !stats) {
@@ -150,6 +187,14 @@ export default function DashboardOverviewPage() {
                 data={chartData}
                 margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
               >
+                <defs>
+                  <linearGradient id="colorVolume" x1="0" y1="0" x2="0" y2="1">
+                    {/* Darker green at the top (0%) */}
+                    <stop offset="5%" stopColor="#1B4D3E" stopOpacity={0.8}/>
+                    {/* Lighter color/opacity at the bottom (100%) */}
+                    <stop offset="95%" stopColor="#1B4D3E" stopOpacity={0.1}/>
+                  </linearGradient>
+                </defs>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} />
                 <XAxis
                   dataKey="name"
@@ -171,7 +216,7 @@ export default function DashboardOverviewPage() {
                   contentStyle={{ borderRadius: "8px", border: "1px solid #e2e8f0" }}
                 />
                 {/* The actual bars, colored to match the theme */}
-                <Bar dataKey="volume" fill="#1B4D3E" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="volume" fill="url(#colorVolume)" radius={[4, 4, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </div>
