@@ -21,6 +21,13 @@ export default function ResetPasswordPage() {
     setIsLoading(true);
     setMessage(null);
 
+    // 🔒 SECURITY CHECK: Enforce 8-character minimum password length
+    if (password.length < 8) {
+      setMessage({ type: "error", text: "Password must be at least 8 characters long." });
+      setIsLoading(false);
+      return;
+    }
+
     const supabase = createClient();
 
     const { error } = await supabase.auth.updateUser({

@@ -35,6 +35,13 @@ export default function SignupPage() {
         setErrorMessage(null);
         setSuccessMessage(null);
 
+        // 🔒 SECURITY CHECK: Enforce 8-character minimum password length
+        if (password.length < 8) {
+            setErrorMessage("Password must be at least 8 characters long.");
+            setIsLoading(false);
+            return;
+        }
+
         // 1. AUTHENTICATION: Create the login record and pass metadata to the trigger
         const { data: authData, error: authError } = await supabase.auth.signUp({
             email: email,
@@ -83,7 +90,6 @@ export default function SignupPage() {
     };
 
     return (
-        // ... (JSX remains the same as your previous attempt, only the logic changed)
         <div className="w-full min-h-screen grid grid-cols-1 md:grid-cols-2 bg-[#E8F3E8]">
             {/* LEFT SIDE: Branding Text */}
             <div className="hidden md:flex flex-col justify-center items-start p-8 lg:p-12 xl:p-16 text-[#1B4D3E]">
@@ -159,7 +165,7 @@ export default function SignupPage() {
                     <div className="space-y-2">
                     <Label htmlFor="password" className="text-[#1B4D3E] font-medium">Password</Label>
                     <Input
-                        id="password" type="password" placeholder="Create a password"
+                        id="password" type="password" placeholder="Create a password (min 8 chars)"
                         value={password} onChange={(e) => setPassword(e.target.value)}
                         className="py-6 bg-gray-100/50 border-gray-200 rounded-xl focus-visible:ring-[#1B4D3E] focus-visible:ring-offset-0"
                         required
