@@ -4,10 +4,9 @@
 
 import { createClient } from "@/lib/supabase/client";
 import { useEffect, useState, useCallback, useMemo } from "react";
-import { Users as UsersIcon, Clock as ClockIcon, Loader2, CheckCircle2, Star, ChevronRight, Ticket, X } from "lucide-react";
-import { UserTopbar } from "@/components/user/topbar";
+import { Users as UsersIcon, Clock as ClockIcon, Loader2, CheckCircle2, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
+import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { getQueueMetrics, joinQueue, leaveQueue, formatTime, getQueues } from "@/utils/queue-service";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
@@ -24,6 +23,18 @@ export default function UserDashboardPage() {
   const [isChecking, setIsChecking] = useState(true); 
   
   const [isQueueModalOpen, setIsQueueModalOpen] = useState(false);
+  const [isClosing, setIsClosing] = useState(false); 
+
+  // ✨ NEW: State to hold our dynamic time-based greeting
+  const [greeting, setGreeting] = useState("Hello");
+
+  const handleCloseModal = () => {
+    setIsClosing(true);
+    setTimeout(() => {
+        setIsQueueModalOpen(false);
+        setIsClosing(false);
+    }, 300);
+  };
 
   const refreshQueueData = useCallback(async (ticket: any) => {
     if (!ticket) return;
@@ -92,21 +103,25 @@ export default function UserDashboardPage() {
       if (!silent) setIsChecking(false);
   }, [supabase, refreshQueueData]);
 
-  // Run on first load
   useEffect(() => {
       fetchInitialData();
   }, [fetchInitialData]);
 
-  // ✨ UPDATED BULLETPROOF REALTIME LISTENER
+  // ✨ NEW: Check the device's clock and set the greeting
   useEffect(() => {
-      // Listen specifically to changes happening in the tickets table
+      const currentHour = new Date().getHours();
+      if (currentHour < 12) {
+          setGreeting("Good Morning");
+      } else if (currentHour < 18) {
+          setGreeting("Good Afternoon");
+      } else {
+          setGreeting("Good Evening");
+      }
+  }, []);
+
+  useEffect(() => {
       const channel = supabase.channel('user_dashboard_updates')
-          .on('postgres_changes', { 
-              event: '*', 
-              schema: 'public', 
-              table: 'tickets' 
-          }, () => {
-              // Instantly re-fetch their data without refreshing the page!
+          .on('postgres_changes', { event: '*', schema: 'public', table: 'tickets' }, () => {
               fetchInitialData(true); 
           })
           .subscribe();
@@ -133,7 +148,7 @@ export default function UserDashboardPage() {
       try {
           const newTicket = await joinQueue(supabase, user.id, selectedQueueId);
           await refreshQueueData(newTicket);
-          setIsQueueModalOpen(false); 
+          handleCloseModal(); 
           toast.success("Successfully joined the queue!");
       } catch (error: any) {
           console.error('Error joining:', error);
@@ -167,10 +182,8 @@ export default function UserDashboardPage() {
 
   if (isChecking) {
     return (
-      <div className="min-h-screen bg-[#E8F3E8] p-4 md:p-8">
-        <UserTopbar />
-        <main className="max-w-md mx-auto space-y-6 mt-6 animate-pulse">
-          <div className="h-7 w-32 bg-gray-300 rounded-md opacity-50"></div>
+        <main className="max-w-md mx-auto space-y-6 mt-2 animate-pulse">
+          <div className="h-8 w-64 bg-gray-300 rounded-md opacity-50"></div>
           <Card className="bg-white border-none shadow-lg overflow-hidden rounded-2xl text-center p-8 space-y-6">
             <CardContent className="p-0 space-y-4 flex flex-col items-center">
               <div className="h-24 w-52 bg-[#E8F3E8] rounded-md opacity-50"></div>
@@ -182,18 +195,17 @@ export default function UserDashboardPage() {
             </CardFooter>
           </Card>
         </main>
-      </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[#E8F3E8] p-4 md:p-8">
-      <UserTopbar />
-
-      <main className="max-w-md mx-auto space-y-6 relative">
-        
-        <div className="animate-in fade-in slide-in-from-bottom-2 duration-500">
-            <p className="text-lg text-[#1B4D3E] font-medium">Hello, {displayName}</p>
+    <>
+      <main className="max-w-md mx-auto space-y-6 relative mt-2">
+        <div className="animate-in fade-in slide-in-from-bottom-2 duration-500 mb-4">
+            {/* ✨ UPDATED: Dynamic greeting with bigger, bolder styling! */}
+            <h1 className="text-3xl font-bold text-[#1B4D3E] tracking-tight">
+                {greeting}, {displayName}!
+            </h1>
 
             {activeTicket && (
             <p className="text-sm text-gray-600 font-medium mt-1">
@@ -204,7 +216,6 @@ export default function UserDashboardPage() {
         </div>
 
         {activeTicket ? (
-          // --- VIEW 1: ACTIVE TICKET ---
           <>
             <Card className="max-w-md w-full bg-white border-none shadow-lg overflow-hidden rounded-2xl ring-1 ring-black/5 p-0 animate-in zoom-in-95 duration-500 ease-out">
               <div className="bg-[#1B4D3E] py-10 px-6 text-center">
@@ -224,8 +235,7 @@ export default function UserDashboardPage() {
               <CardContent className="p-6 space-y-6">
                 <div className="bg-[#E8F5E9] rounded-xl p-6 flex flex-col items-center justify-center text-center border border-[#1B4D3E]/10">
                   <p className="text-[#1B4D3E] font-semibold flex items-center gap-2 mb-1">
-                    <UsersIcon className="h-5 w-5" /> 
-                    Current Position
+                    <UsersIcon className="h-5 w-5" /> Current Position
                   </p>
                   <div className="text-4xl font-bold text-[#1B4D3E]">
                     {activeTicket.currentPosition}
@@ -237,8 +247,7 @@ export default function UserDashboardPage() {
 
                 <div className="bg-[#E8F5E9] rounded-xl p-6 flex flex-col items-center justify-center text-center border border-[#1B4D3E]/10">
                   <p className="text-[#1B4D3E] font-semibold flex items-center gap-2 mb-1">
-                    <ClockIcon className="h-5 w-5" /> 
-                    Estimated Time Wait
+                    <ClockIcon className="h-5 w-5" /> Estimated Time Wait
                   </p>
                   <div className="text-4xl font-bold text-[#1B4D3E]">
                     {activeTicket.estimatedWait}
@@ -283,19 +292,14 @@ export default function UserDashboardPage() {
             </Card>
           </>
         ) : (
-          // --- VIEW 2: NO TICKET ---
           <Card className="bg-white border-none shadow-lg overflow-hidden rounded-2xl text-center p-8 space-y-6 animate-in zoom-in-95 duration-500 ease-out">
             <CardContent className="p-0 space-y-6">
               <div className="h-24 w-24 bg-[#E8F3E8] rounded-full flex items-center justify-center mx-auto">
                 <UsersIcon className="h-12 w-12 text-[#1B4D3E]" />
               </div>
               <div className="space-y-2">
-                  <h2 className="text-2xl font-bold text-[#1B4D3E]">
-                    Not in a Queue yet?
-                  </h2>
-                  <p className="text-gray-500">
-                    Click the button below to select a service and get your ticket number.
-                  </p>
+                  <h2 className="text-2xl font-bold text-[#1B4D3E]">Not in a Queue yet?</h2>
+                  <p className="text-gray-500">Click the button below to select a service and get your ticket number.</p>
               </div>
             </CardContent>
             
@@ -317,11 +321,17 @@ export default function UserDashboardPage() {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           
           <div 
-             className="cursor-pointer absolute inset-0 bg-black/40 backdrop-blur-sm animate-in fade-in duration-300"
-             onClick={() => setIsQueueModalOpen(false)} 
-          ></div>
+             className={cn(
+               "cursor-pointer absolute inset-0 bg-black/60 backdrop-blur-sm duration-300",
+               isClosing ? "animate-out fade-out" : "animate-in fade-in"
+             )}
+             onClick={() => !loading && handleCloseModal()} 
+          />
           
-          <div className="bg-white w-full max-w-md rounded-2xl shadow-2xl overflow-hidden flex flex-col relative z-10 animate-in fade-in slide-in-from-bottom-8 duration-300 ease-out">
+          <div className={cn(
+              "bg-white w-full max-w-md rounded-2xl shadow-2xl overflow-hidden flex flex-col relative z-10 duration-300 ease-out",
+              isClosing ? "animate-out fade-out slide-out-to-bottom-8 zoom-out-95" : "animate-in fade-in slide-in-from-bottom-8 zoom-in-95"
+          )}>
             
             <div className="p-6 text-center border-b border-gray-100">
               <h3 className="text-2xl font-bold text-[#1B4D3E]">Select Service</h3>
@@ -344,15 +354,12 @@ export default function UserDashboardPage() {
                         {selectedQueueId === q.id && <CheckCircle2 className="h-6 w-6 text-[#1B4D3E]" />}
                     </button>
                 ))}
-                {queues.length === 0 && (
-                    <p className="text-sm text-center text-red-500">No queues configured yet.</p>
-                )}
               </div>
             </div>
 
             <div className="p-6 border-t border-gray-100 flex gap-3 bg-white">
               <Button 
-                  onClick={() => setIsQueueModalOpen(false)} 
+                  onClick={handleCloseModal} 
                   variant="outline" 
                   className="cursor-pointer flex-1 py-6 text-lg font-bold rounded-xl border-gray-200 text-gray-600 hover:bg-gray-100 transition-colors"
                   disabled={loading}
@@ -367,10 +374,9 @@ export default function UserDashboardPage() {
                  {loading ? <Loader2 className="h-5 w-5 animate-spin" /> : "Confirm"}
               </Button>
             </div>
-
           </div>
         </div>
       )}
-    </div>
+    </>
   );
 }

@@ -129,7 +129,6 @@ export default function UserProfilePage() {
       }
   };
 
-  // ✨ UPDATED: Now utilizes the loading state so double-clicks are blocked
   const handleForgotPassword = async () => {
       if (!user?.email) return;
       setForgotPasswordLoading(true);
@@ -140,7 +139,6 @@ export default function UserProfilePage() {
           if (error) throw error;
           toast.success("A password reset link has been sent to your email.");
           
-          // Close both modals on success
           setIsForgotConfirmModalOpen(false);
           setIsPasswordModalOpen(false);
       } catch (error: any) {
@@ -208,12 +206,21 @@ export default function UserProfilePage() {
   if (!user || history === null) return <div className="h-screen flex items-center justify-center bg-[#E8F3E8]"><Loader2 className="h-10 w-10 animate-spin text-[#1B4D3E]" /></div>;
 
   return (
-    <div className="min-h-screen bg-[#E8F3E8] p-4 md:p-8">
-      <header className="max-w-md mx-auto flex items-center justify-between mb-6">
-        <h1 className="text-3xl font-bold text-[#1B4D3E]">Profile</h1>
-        <Button variant="ghost" size="icon" onClick={() => router.push("/home")} className="cursor-pointer">
-            <ArrowLeft className="h-6 w-6" />
+    // ✨ CHANGED: Replaced p-4 md:p-8 with px-4 md:px-8 pb-8 pt-0 to shrink the top gap
+    <div className="min-h-screen bg-[#E8F3E8] px-4 md:px-8 pb-8 pt-0">
+      
+      {/* ✨ CHANGED: Reorganized to put the back button behind the title and made it a visible outline button */}
+      <header className="max-w-md mx-auto flex items-center gap-4 mb-4">
+        <Button 
+          variant="outline" 
+          size="icon" 
+          onClick={() => router.push("/home")} 
+          className="cursor-pointer h-10 w-10 border-gray-300 text-[#1B4D3E] bg-white hover:bg-[#E8F3E8] shadow-sm transition-colors"
+        >
+            <ArrowLeft className="h-5 w-5" />
+            <span className="sr-only">Go Back</span>
         </Button>
+        <h1 className="text-3xl font-bold text-[#1B4D3E]">Profile</h1>
       </header>
 
       <main className="max-w-md mx-auto relative">
@@ -348,8 +355,6 @@ export default function UserProfilePage() {
                     <div className="space-y-2">
                         <div className="flex justify-between">
                             <Label className="text-[#1B4D3E] font-medium">Current Password</Label>
-                            
-                            {/* ✨ UPDATED: Triggers the new Confirmation Popup */}
                             <button 
                                 onClick={(e) => { e.preventDefault(); setIsForgotConfirmModalOpen(true); }} 
                                 className="cursor-pointer text-xs text-[#1B4D3E] font-semibold hover:underline"
@@ -379,7 +384,7 @@ export default function UserProfilePage() {
         </div>
       )}
 
-      {/* ✨ NEW: FORGOT PASSWORD CONFIRMATION MODAL */}
+      {/* --- FORGOT PASSWORD CONFIRMATION MODAL --- */}
       {isForgotConfirmModalOpen && (
           <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
               <div className="cursor-pointer absolute inset-0 bg-black/60 backdrop-blur-sm animate-in fade-in duration-300" onClick={() => !forgotPasswordLoading && setIsForgotConfirmModalOpen(false)}></div>
