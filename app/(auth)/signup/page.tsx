@@ -9,7 +9,6 @@ import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-// ✨ IMPORT: Added Loader2 for the spinning animation
 import { AlertCircle, Loader2 } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import Image from "next/image";
@@ -27,9 +26,7 @@ export default function SignupPage() {
 
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
-  // ✨ NEW: Boolean check to see if all forms have text in them
   const isFormComplete =
     email.trim() !== "" &&
     password.trim() !== "" &&
@@ -41,16 +38,13 @@ export default function SignupPage() {
     e.preventDefault();
     setIsLoading(true);
     setErrorMessage(null);
-    setSuccessMessage(null);
 
-    // 🔒 SECURITY CHECK: Enforce 8-character minimum password length
     if (password.length < 8) {
       setErrorMessage("Password must be at least 8 characters long.");
       setIsLoading(false);
       return;
     }
 
-    // 1. AUTHENTICATION: Create the login record
     const { data: authData, error: authError } = await supabase.auth.signUp({
       email: email,
       password: password,
@@ -60,48 +54,35 @@ export default function SignupPage() {
           first_name: firstName,
           last_name: lastName,
         },
-        // ✨ FIX: This forces the email confirmation link to bring them to the login page!
         emailRedirectTo: `${window.location.origin}/login`,
       },
     });
 
     if (authError) {
-      // ✨ FIX: Catch duplicate emails and show the custom message
-      if (
-        authError.message.includes("User already registered") ||
-        authError.message.includes("already exists")
-      ) {
-        setErrorMessage(
-          "There is already a user with this email, log in instead.",
-        );
-      } else {
-        setErrorMessage(authError.message);
-      }
+      setErrorMessage(authError.message);
       setIsLoading(false);
       return;
     }
 
-    // --- SUCCESS LOGIC ---
-    setSuccessMessage(
-      "Success! Check your email to confirm your account and log in.",
-    );
+    // ✨ PREVENT DUPLICATES: Check the identities array
+    if (
+      authData.user &&
+      authData.user.identities &&
+      authData.user.identities.length === 0
+    ) {
+      setErrorMessage(
+        "There is already a user with this email, log in instead.",
+      );
+      setIsLoading(false);
+      return;
+    }
 
-    // Clear forms upon success
-    setEmail("");
-    setPassword("");
-    setPreferredName("");
-    setFirstName("");
-    setLastName("");
-
-    setIsLoading(false);
-
-    // ✨ FIX: Removed the setTimeout and router.push('/login')
-    // Now the user stays on this page and sees the success message!
+    // ✨ AUTO-REDIRECT: Send them straight to the login page with a success flag
+    router.push("/login?signup=success");
   };
 
   return (
     <div className="w-full min-h-screen grid grid-cols-1 md:grid-cols-2 bg-[#E8F3E8]">
-      {/* LEFT SIDE: Branding Text */}
       <div className="hidden md:flex flex-col justify-center items-start p-8 lg:p-12 xl:p-16 text-[#1B4D3E]">
         <h1 className="text-5xl lg:text-7xl xl:text-[100px] font-bold mb-4 lg:mb-6 flex items-center gap-3 lg:gap-5 transition-all duration-300">
           <Image
@@ -118,7 +99,6 @@ export default function SignupPage() {
         </p>
       </div>
 
-      {/* RIGHT SIDE: The Sign Up Card */}
       <div className="flex items-center justify-center p-4 md:p-8">
         <div className="w-full max-w-[450px] bg-white rounded-2xl shadow-xl p-8 md:p-12 space-y-8">
           <div className="text-center">
@@ -129,7 +109,6 @@ export default function SignupPage() {
           </div>
 
           <form onSubmit={handleSignUp} className="space-y-6">
-            {/* Preferred Name Field */}
             <div className="space-y-2">
               <Label
                 htmlFor="preferredName"
@@ -148,7 +127,6 @@ export default function SignupPage() {
               />
             </div>
 
-            {/* First/Last Name Fields in a grid */}
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label
@@ -218,11 +196,9 @@ export default function SignupPage() {
 
             <Button
               type="submit"
-              // ✨ FIX: Button stays disabled until all 5 forms have text
               disabled={!isFormComplete || isLoading}
               className="w-full py-6 text-lg font-semibold bg-[#1B4D3E] hover:bg-[#153a2f] text-white rounded-xl mt-4 disabled:opacity-70 flex items-center justify-center"
             >
-              {/* ✨ FIX: Added circular loading animation */}
               {isLoading ? (
                 <>
                   <Loader2 className="mr-2 h-5 w-5 animate-spin" />
@@ -234,7 +210,6 @@ export default function SignupPage() {
             </Button>
           </form>
 
-          {/* Messages */}
           {errorMessage && (
             <Alert
               variant="destructive"
@@ -243,17 +218,6 @@ export default function SignupPage() {
               <AlertCircle className="h-4 w-4" />
               <AlertTitle>Error</AlertTitle>
               <AlertDescription>{errorMessage}</AlertDescription>
-            </Alert>
-          )}
-
-          {successMessage && (
-            <Alert
-              variant="default"
-              className="bg-green-50 text-[#1B4D3E] border-[#A8D3B8]"
-            >
-              <AlertCircle className="h-4 w-4" />
-              <AlertTitle>Success</AlertTitle>
-              <AlertDescription>{successMessage}</AlertDescription>
             </Alert>
           )}
 

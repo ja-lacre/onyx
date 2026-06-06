@@ -2,7 +2,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 
 import { createClient } from "@/lib/supabase/client";
@@ -11,8 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Image from "next/image";
 
-// ✨ IMPORT: Added Loader2 for the spinning animation
-import { AlertCircle, Loader2 } from "lucide-react";
+import { AlertCircle, Loader2, CheckCircle2 } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 export default function LoginPage() {
@@ -24,10 +23,24 @@ export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
+  // ✨ NEW: State to show the verification notification
+  const [showVerificationToast, setShowVerificationToast] = useState(false);
+
+  // ✨ NEW: Check the URL for the success flag when the page loads
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const urlParams = new URLSearchParams(window.location.search);
+      if (urlParams.get("signup") === "success") {
+        setShowVerificationToast(true);
+      }
+    }
+  }, []);
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     setErrorMessage(null);
+    setShowVerificationToast(false); // Hide toast if they try to log in
 
     const { data: authData, error: authError } =
       await supabase.auth.signInWithPassword({
@@ -69,7 +82,6 @@ export default function LoginPage() {
 
   return (
     <div className="w-full min-h-screen grid grid-cols-1 md:grid-cols-2 bg-[#E8F3E8]">
-      {/* LEFT SIDE: Branding Text */}
       <div className="hidden md:flex flex-col justify-center items-start p-8 lg:p-12 xl:p-16 text-[#1B4D3E]">
         <h1 className="text-5xl lg:text-7xl xl:text-[100px] font-bold mb-4 lg:mb-6 flex items-center gap-3 lg:gap-5 transition-all duration-300">
           <Image
@@ -86,9 +98,8 @@ export default function LoginPage() {
         </p>
       </div>
 
-      {/* RIGHT SIDE: The Login Card */}
       <div className="flex items-center justify-center p-4 md:p-8">
-        <div className="w-full max-w-[450px] bg-white rounded-2xl shadow-xl p-8 md:p-12 space-y-8">
+        <div className="w-full max-w-[450px] bg-white rounded-2xl shadow-xl p-8 md:p-12 space-y-8 relative">
           <div className="text-center">
             <h2 className="text-3xl font-bold text-[#1B4D3E]">Welcome Back</h2>
             <p className="text-gray-500 mt-3">
@@ -130,9 +141,8 @@ export default function LoginPage() {
             <Button
               type="submit"
               disabled={isLoading}
-              className="w-full py-6 text-lg font-semibold bg-[#1B4D3E] hover:bg-[#153a2f] text-white rounded-xl mt-4 disabled:opacity-70 flex items-center justify-center cursor-pointer"
+              className="w-full py-6 text-lg font-semibold bg-[#1B4D3E] hover:bg-[#153a2f] text-white rounded-xl mt-4 disabled:opacity-70 flex items-center justify-center"
             >
-              {/* ✨ UPDATED: Spinning loader appears when signing in */}
               {isLoading ? (
                 <>
                   <Loader2 className="mr-2 h-5 w-5 animate-spin" />
@@ -143,6 +153,21 @@ export default function LoginPage() {
               )}
             </Button>
           </form>
+
+          {/* ✨ NOTIFICATIONS AREA */}
+          {showVerificationToast && (
+            <Alert
+              variant="default"
+              className="bg-green-50 text-[#1B4D3E] border-[#A8D3B8] animate-in slide-in-from-top-2 duration-500"
+            >
+              <CheckCircle2 className="h-4 w-4" />
+              <AlertTitle>Verify your email</AlertTitle>
+              <AlertDescription>
+                We've sent a verification link to your inbox. Please confirm
+                your email address before logging in.
+              </AlertDescription>
+            </Alert>
+          )}
 
           {errorMessage && (
             <Alert
