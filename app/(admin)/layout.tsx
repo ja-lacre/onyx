@@ -18,13 +18,16 @@ export default function DashboardLayout({
 
   return (
     <TooltipProvider>
-      <div className="flex min-h-screen bg-gray-50 overflow-hidden">
-        {}
+      {/* ✨ FIX: Changed min-h-screen to h-screen to lock the layout! */}
+      <div className="flex h-screen bg-gray-50 overflow-hidden">
+        {/* Sidebar */}
         <Sidebar isSidebarOpen={isSidebarOpen} toggleSidebar={toggleSidebar} />
 
-        {}
+        {/* Main content wrapper */}
         <div className="flex flex-col flex-1 overflow-hidden">
           <Topbar />
+
+          {/* This main tag handles the scrolling because of overflow-y-auto! */}
           <main className="flex-1 p-6 md:p-8 overflow-y-auto overflow-x-hidden bg-gray-50/50 relative">
             {children}
           </main>
