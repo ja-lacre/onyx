@@ -4,9 +4,24 @@ Project Codename **ONYX** is a modern, real-time Queue Management System (QMS) t
 
 | Internal Release Code | Date Released |
 | :-------------------- | :------------ |
+| ON.010.004            | 2026-06-09    |
 | ON.010.003            | 2026-04-25    |
 | ON.010.002            | 2026-04-12    |
 | ON.010.001            | 2026-02-27    |
+
+## ON.010.004 Release Notes
+
+- Integrated multi-queue support (e.g., University Registrar, Infirmary, Canteen) with independent, per-queue ticketing counters powered by PostgreSQL triggers.
+- Upgraded the UI/UX with smooth modal animations, sliding tab transitions, pulsing skeleton loading screens (`loading.tsx`), and `react-easy-crop` for dynamic profile picture uploads.
+- Implemented global toast notifications using `sonner` to improve user feedback across profile updates, queue changes, and settings modifications.
+- Added Priority Routing to the admin dashboard, allowing admins to elevate tickets (P-XX format) with instant Supabase Realtime syncing across all user screens.
+- Configured 30-minute session persistence across browser closures using Next.js Middleware and updated Supabase client configurations.
+- Enhanced authentication security by enforcing an 8-character password minimum and preventing duplicate-email signups via `identities` array verification.
+- Integrated custom SMTP via Resend to bypass default email limits, complete with customized HTML email templates and DMARC configuration for improved deliverability.
+- Established comprehensive Storage and RLS permissions allowing admins to manage queues and users to update profiles/avatars securely.
+
+**Known Issues/Bugs:**
+- Custom SMTP domain reputation may initially cause automated emails (such as password resets) to land in spam folders depending on DMARC propagation and receiving provider policies.
 
 ## ON.010.003 Release Notes
 
